@@ -2689,7 +2689,7 @@ void applyMaxAccel() { planner.set_max_acceleration(hmiValue.axis, menuData.valu
 #if ENABLED(LIN_ADVANCE)
   #define LA_FDIGITS 3
   void applyLA_K() { planner.set_advance_k(menuData.value / POW(10, LA_FDIGITS)); }
-  void setLA_K() { setFloatOnClick(0, 10, LA_FDIGITS, planner.get_advance_K(), applyLA_K); }
+  void setLA_K() { setFloatOnClick(0, 10, LA_FDIGITS, planner.get_advance_k(), applyLA_K); }
   void onDrawLA_K(MenuItem* menuitem, int8_t line) { onDrawFloatMenu(menuitem, line, LA_FDIGITS, planner.get_advance_k()); }
   #if ENABLED(SMOOTH_LIN_ADVANCE)
     void applySmoothLA() { stepper.set_advance_tau(menuData.value / POW(10, 2)); }
