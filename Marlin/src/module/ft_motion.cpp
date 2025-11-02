@@ -53,8 +53,8 @@ FTMotion ftMotion;
 ft_config_t FTMotion::cfg;
 bool FTMotion::busy; // = false
 
-XYZEval<millis_t> FTMotion::axis_move_end_ti = { 0 };
-AxisBits FTMotion::axis_move_dir;
+AxisBits FTMotion::moving_axis_flags,           // These axes are moving in the planner block being processed
+         FTMotion::axis_move_dir;               // ...in these directions
 
 // Private variables.
 
@@ -157,7 +157,10 @@ void FTMotion::loop() {
   fill_stepper_plan_buffer();
 
   // Set busy status for use by planner.busy()
+  const bool oldBusy = busy;
   busy = stepping.bresenham_iterations_pending > 0 || !stepper_plan_is_empty();
+  if (oldBusy && !busy) moving_axis_flags.reset();
+
 }
 
 #if HAS_FTM_SHAPING
@@ -211,7 +214,7 @@ void FTMotion::reset() {
   TERN_(HAS_EXTRUDERS, prev_traj_e = 0.0f);  // Reset linear advance variables.
   TERN_(DISTINCT_E_FACTORS, block_extruder_axis = E_AXIS);
 
-  axis_move_end_ti.reset();
+  moving_axis_flags.reset();
 
   if (did_suspend) stepper.wake_up();
 }
@@ -348,20 +351,19 @@ bool FTMotion::plan_next_block() {
 
     TERN_(FTM_HAS_LIN_ADVANCE, use_advance_lead = current_block->use_advance_lead);
 
-    // Watch endstops until the move ends
-    const millis_t move_end_ti = millis() + \
-      stepper_plan_count() * FTM_TS + // Time to empty stepper command buffer
-      SEC_TO_MS(currentGenerator->getTotalDuration()) + // Time to finish this block
-      SEC_TO_MS((FTM_TS) * calc_runout_samples()); // Time for a rounout block
-
     #define _SET_MOVE_END(A) do{ \
       if (moveDist.A) { \
-        axis_move_end_ti.A = move_end_ti; \
+        moving_axis_flags.A = true; \
         axis_move_dir.A = moveDist.A > 0; \
       } \
     }while(0);
 
     LOGICAL_AXIS_MAP(_SET_MOVE_END);
+
+    // If the endstop is already pressed, endstop interrupts won't invoke
+    // endstop_triggered and the move will grind. So check here for a
+    // triggered endstop, which marks the block for discard on the next ISR.
+    endstops.update();
 
     return true;
   }

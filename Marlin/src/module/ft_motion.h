@@ -135,8 +135,8 @@ class FTMotion {
       reset();
     }
 
-    static XYZEval<millis_t> axis_move_end_ti;
-    static AxisBits axis_move_dir;
+    static AxisBits moving_axis_flags,                    // These axes are moving in the planner block being processed
+                    axis_move_dir;                        // ...in these directions
 
     // Public methods
     static void init();
@@ -169,7 +169,7 @@ class FTMotion {
     static TrajectoryType getTrajectoryType() { return trajectoryType; }
 
     FORCE_INLINE static bool axis_is_moving(const AxisEnum axis) {
-      return cfg.active ? PENDING(millis(), axis_move_end_ti[axis]) : stepper.axis_is_moving(axis);
+      return cfg.active ? moving_axis_flags[axis] : stepper.axis_is_moving(axis);
     }
     FORCE_INLINE static bool motor_direction(const AxisEnum axis) {
       return cfg.active ? axis_move_dir[axis] : stepper.last_direction_bits[axis];
