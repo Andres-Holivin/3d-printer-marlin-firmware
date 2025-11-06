@@ -75,8 +75,8 @@ TrajectoryType FTMotion::trajectoryType = TrajectoryType::FTM_TRAJECTORY_TYPE;
 stepper_plan_t FTMotion::stepper_plan_buff[FTM_BUFFER_SIZE];
 XYZEval<int64_t> FTMotion::curr_steps_q32_32 = {0};
 
-uint32_t FTMotion::stepper_plan_tail = 0,            // The index to consume from
-         FTMotion::stepper_plan_head = 0;            // The index to produce into
+uint32_t FTMotion::stepper_plan_tail = 0,           // The index to consume from
+         FTMotion::stepper_plan_head = 0;           // The index to produce into
 
 #if FTM_HAS_LIN_ADVANCE
   bool FTMotion::use_advance_lead;
@@ -240,16 +240,16 @@ void FTMotion::discard_planner_block_protected() {
 uint32_t FTMotion::calc_runout_samples() {
   xyze_long_t delay = {0};
   #if ENABLED(FTM_SMOOTHING)
-    #define _ADD(A) delay.A += smoothing.A.delay_samples;
-    LOGICAL_AXIS_MAP(_ADD)
-    #undef _ADD
+    #define _DELAY_ADD(A) delay.A += smoothing.A.delay_samples;
+    LOGICAL_AXIS_MAP(_DELAY_ADD)
+    #undef _DELAY_ADD
   #endif
 
   #if HAS_FTM_SHAPING
     // Ni[max_i] is the delay of the last pulse, but it is relative to Ni[0] (the negative delay centroid)
-    #define _ADD(A) if(shaping.A.ena) delay.A += shaping.A.Ni[shaping.A.max_i] - shaping.A.Ni[0];
-    SHAPED_MAP(_ADD)
-    #undef _ADD
+    #define _DELAY_ADD(A) if (shaping.A.ena) delay.A += shaping.A.Ni[shaping.A.max_i] - shaping.A.Ni[0];
+    SHAPED_MAP(_DELAY_ADD)
+    #undef _DELAY_ADD
   #endif
   return delay.large();
 }
