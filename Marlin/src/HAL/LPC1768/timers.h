@@ -170,4 +170,4 @@ FORCE_INLINE static void HAL_timer_isr_prologue(const uint8_t timer_num) {
   }
 }
 
-#define HAL_timer_isr_epilogue(TIMER_NUM)
+inline void HAL_timer_isr_epilogue(const uint8_t) {}
