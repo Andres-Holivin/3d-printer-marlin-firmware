@@ -253,7 +253,7 @@ uint32_t Stepper::advance_divisor = 0,
 #endif
 
 /**
- * Standard Motion Non-linear Exttrusion state
+ * Standard Motion Non-linear Extrusion state
  */
 #if ENABLED(NONLINEAR_EXTRUSION)
   nonlinear_t Stepper::ne;              // Initialized by settings.load

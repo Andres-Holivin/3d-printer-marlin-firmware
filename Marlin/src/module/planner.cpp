@@ -2542,6 +2542,8 @@ bool Planner::_populate_block(
         xyze_float_t junction_unit_vec = unit_vec - prev_unit_vec;
         normalize_junction_vector(junction_unit_vec);
 
+        // TODO: Don't limit acceleration on axes with very small distance relative to others
+        // See https://github.com/MarlinFirmware/Marlin/issues/27918#issuecomment-3145339116
         const float junction_acceleration = limit_value_by_axis_maximum(block->acceleration, junction_unit_vec);
 
         if (TERN0(HINTS_CURVE_RADIUS, hints.curve_radius)) {
