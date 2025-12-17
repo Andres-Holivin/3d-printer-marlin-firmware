@@ -517,7 +517,8 @@ void menu_move() {
 
       CARTES_MAP(_FTM_AXIS_SUBMENU);
 
-      EDIT_ITEM(bool, MSG_FTM_AXIS_SYNC, &c.axis_sync_enabled);
+      editable.state = c.axis_sync_enabled;
+      EDIT_ITEM(bool, MSG_FTM_AXIS_SYNC, &editable.state, []{ c.setAxisSync(editable.state); });
 
       #if ENABLED(FTM_RESONANCE_TEST)
         SUBMENU(MSG_FTM_RESONANCE_TEST, menu_ftm_resonance_test);
