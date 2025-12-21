@@ -1,4 +1,5 @@
 SCRIPTS_DIR := buildroot/share/scripts
+MAKESCRIPTS_DIR := buildroot/share/make
 CONTAINER_RT_BIN := docker
 CONTAINER_RT_OPTS := --rm -v $(PWD):/code -v platformio-cache:/root/.platformio
 CONTAINER_IMAGE := marlin-dev
@@ -36,6 +37,7 @@ help:
 	@echo "make validate-lines -j         : Validate line endings, fails on trailing whitespace, etc."
 	@echo "make validate-pins -j          : Validate all pins files, fails if any require reformatting"
 	@echo "make validate-boards -j        : Validate boards.h and pins.h for standards compliance"
+	@echo "make validate-urls             : Validate URLs in source files"
 	@echo "make tests-single-ci           : Run a single test from inside the CI"
 	@echo "make tests-single-local        : Run a single test locally"
 	@echo "make tests-single-local-docker : Run a single test locally, using docker"
@@ -151,7 +153,7 @@ validate-pins: format-pins
 	@echo "Validating pins files"
 	@git diff --exit-code || (git status && echo "\nError: Pins files are not formatted correctly. Run \"make format-pins\" to fix.\n" && exit 1)
 
-.PHONY: format-lines validate-lines
+.PHONY: format-lines validate-lines validate-urls
 
 format-lines:
 	@echo "Formatting all sources"
@@ -161,6 +163,10 @@ format-lines:
 validate-lines:
 	@echo "Validating text formatting"
 	@npx prettier --check . --editorconfig --object-wrap preserve
+
+validate-urls:
+	@echo "Checking URLs in source files"
+	@$(MAKESCRIPTS_DIR)/check-urls.sh
 
 BOARDS_FILE := Marlin/src/core/boards.h
 
